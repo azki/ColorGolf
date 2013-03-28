@@ -50,25 +50,9 @@ a { color:yellow; }
 		<div id="zone"></div>
 		<div id="btns"></div>
 		<script src="jquery.js"></script>
-		<script src="phonegap-1.3.0.js"></script>
 		<script src="color_golf.js"></script>
 		<script>
-var init = function () {
-	if (loadGame() === false) {
-		restoreName();
-		initGame(getLastCell());
-	}
-};
-if (typeof PhoneGap === "undefined") {
-	init();
-} else {
-	document.addEventListener("deviceready", function () {
-		document.addEventListener('touchmove', function (e) {
-			e.preventDefault();
-		}, false);
-		init();
-	}, false);
-}
+initGame(4);
 		</script>
 	</body>
 </html>
