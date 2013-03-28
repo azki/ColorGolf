@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>Hello, ColorGolf Stage Maker</title>
+		<style>
+.color0 {background:#5E69FF;-webkit-animation:color0 1.5s;}
+@-webkit-keyframes color0{0% {background:#113;} 100% {background:#5E69FF;}}
+.color1 {background:#4AE8D2;-webkit-animation:color1 1.5s;}
+@-webkit-keyframes color1{0% {background:#132;}100% {background:#4AE8D2;}}
+.color2 {background:#8DFF51;-webkit-animation:color2 1.5s;}
+@-webkit-keyframes color2{0% {background:#131;}100% {background:#8DFF51;}}
+.color3 {background:#FFDB51;-webkit-animation:color3 1.5s;}
+@-webkit-keyframes color3{0% {background:#321;}100% {background:#FFDB51;}}
+.color4 {background:#FF844C;-webkit-animation:color4 1.5s;}
+@-webkit-keyframes color4{0% {background:#311;}100% {background:#FF844C;}}
+.color5 {background:#E84ADF;-webkit-animation:color5 1.5s;}
+@-webkit-keyframes color5{0% {background:#312;}100% {background:#E84ADF;}}
+.color99 {background:#fff;}
+body { background:#000; color:#fff; }
+a { color:yellow; }
+#score { font-family:Georgia; font-size:12pt; }
+#topBtnPanel,#topStatePanel { margin-top:-5px; font-family:Georgia; font-size:22pt; text-align:center; }
+#topStatePanel { display:none; }
+#turn { font-weight:bold; }
+#zone { margin:1px 0 2px 0; border-top:1px dashed #fff; border-bottom:1px dashed #fff; }
+#zone table { margin:auto; }
+#zone td { background:#000; }
+#btns { padding-left:1px; text-align:center; }
+#btns div { display:inline-block; margin:0 0 -1px 0; border:1px dotted #fff; border-radius:15px; padding:0; width:104px; height:37px; cursor:pointer; }
+		</style>
+   	</head>
+	<body style="margin:0;padding:0;">
+		<div id="score">
+			S: <span id="stage"></span>&nbsp;
+			Turn: <span id="turn"></span>
+		</div>
+		<div>
+			<div id="topBtnPanel">
+				<a href="javascript:changeStage(0);void(0);">Re</a>
+				|<a href="javascript:changeStage(-1);void(0);">Lv↓</a>
+				|<a href="javascript:changeStage(1);void(0);">Lv↑</a>
+				|<a href="javascript:viewRecord();void(0);">Top</a>
+				|<a href="javascript:alert(ddd());void(0);">?</a>
+			</div>
+			<div id="topStatePanel">
+				서버와 연결중 . . .
+			</div>
+		</div>
+		<div id="zone"></div>
+		<div id="btns"></div>
+		<script src="jquery.js"></script>
+		<script src="phonegap-1.3.0.js"></script>
+		<script src="color_golf.js"></script>
+		<script>
+var init = function () {
+	if (loadGame() === false) {
+		restoreName();
+		initGame(getLastCell());
+	}
+};
+if (typeof PhoneGap === "undefined") {
+	init();
+} else {
+	document.addEventListener("deviceready", function () {
+		document.addEventListener('touchmove', function (e) {
+			e.preventDefault();
+		}, false);
+		init();
+	}, false);
+}
+		</script>
+	</body>
+</html>
