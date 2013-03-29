@@ -11,7 +11,7 @@ if (!this.window) {
 		argv: []
 	};
 }
-var SERVER_STAGE = process.argv[2] ? +process.argv[2] : 5;
+var SERVER_STAGE = process.argv[2] ? +process.argv[2] : -1;
 var SERVER_URL = '';
 
 var data = {
@@ -305,12 +305,13 @@ if (require.main === module) {
 	console.log('SERVER_STAGE : ' + SERVER_STAGE);
 	console.log('SERVER_URL : ' + SERVER_URL);
 	request = require('request');
-	ddGoal = SERVER_STAGE * SERVER_STAGE;
 	count = 0;
 	loop = function () {
-		var s, n, startTime, spend, min, max, sumCount;
+		var s, n, startTime, spend, min, max, sumCount, stage;
+		stage = SERVER_STAGE < 0 ? Math.floor(Math.random() * 2) + 4: SERVER_STAGE;
+		ddGoal = stage * stage;
 		resetDd();
-		initGame(SERVER_STAGE);
+		initGame(stage);
 		s = data.color.join('');
 		startTime = new Date();
 		simulationGo(JSON.stringify(data), 0, "");
@@ -324,7 +325,7 @@ if (require.main === module) {
 		request.post({
 			url: SERVER_URL,
 			form: {
-				cell: SERVER_STAGE,
+				cell: stage,
 				code: s,
 				sum_c: sumCount,
 				min: ddMin,
@@ -343,7 +344,7 @@ if (require.main === module) {
 			console.log(b || 'ok');
 			process.nextTick(loop);
 		});
-		console.log('\t' + (count += 1) + '\t\t' + sumCount + '\t\t' + Math.round(spend / 1000) + ' sec\t\t' + (sumCount / spend));
+		console.log((count += 1) + stage + '\t' + stage + '\t' + sumCount + '\t\t' + Math.round(spend / 1000) + ' sec\t\t' + (sumCount / spend));
 		//setTimeout(loop, 1);
 	};
 	loop();
