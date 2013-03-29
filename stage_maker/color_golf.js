@@ -1,7 +1,7 @@
 /*global window, $, setTimeout*/
 /*global require,module,process*/
 /*global checkAround,initGame,simulationGo*/
-var SERVER_STAGE = 5;
+var SERVER_STAGE = process.argv[2] ? +process.argv[2] : 5;
 var SERVER_URL = '';
 var NO_UI = false;
 if (!this.window) {
@@ -280,6 +280,7 @@ var simulationGo = function (s, w) {
 if (require.main === module) {
 	var request, count, loop;
 	SERVER_URL = require('fs').readFileSync('./serverurl.txt').toString().trim();
+	console.log('SERVER_STAGE : ' + SERVER_STAGE);
 	console.log('SERVER_URL : ' + SERVER_URL);
 	request = require('request');
 	ddGoal = SERVER_STAGE * SERVER_STAGE;
