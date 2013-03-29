@@ -1,0 +1,13 @@
+{
+  "author": "azki",
+  "name": "colorgolf",
+  "version": "0.1.0",
+  "repository": {
+  },
+  "dependencies": {
+    "request": "2.10.0"
+  },
+  "engines": {
+    "node": "*"
+  }
+}

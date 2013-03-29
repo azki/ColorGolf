@@ -1,38 +1,48 @@
 /*global window, $, setTimeout*/
-/*global checkAround,initGame,dd2,dd3*/
+/*global require,module*/
+/*global checkAround,initGame,simulationGo*/
+var SERVER_STAGE = 4;
+var SERVER_URL = '';
+var NO_UI = false;
 if (!this.window) {
 	window = {};
+	NO_UI = true;
+} else {
+	require = {};
+	module = {};
 }
 var data = {
-	cell: 0,
 	color: [],
 	mine: [],
-	minesum: 1,
+	minesum: 1
+};
+var data2 = {
+	cell: 0,
 	turn: 0
 };
 var checkCache = [];
 var animateBuffer = [];
-var NO_UI = false;
 
 var resetCheckCache = function () {
 	var rowIndex;
 	checkCache = [];
-	for (rowIndex = 0; rowIndex < data.cell; rowIndex += 1) {
+	for (rowIndex = 0; rowIndex < data2.cell; rowIndex += 1) {
 		checkCache[rowIndex] = [];
 	}
 };
 var initZone = function () {
-	var rowIndex, cellIndex;
-	for (rowIndex = 0; rowIndex < data.cell; rowIndex += 1) {
-		data.color[rowIndex] = [];
-		data.mine[rowIndex] = [];
-		for (cellIndex = 0; cellIndex < data.cell; cellIndex += 1) {
+	var rowIndex, cellIndex, arrIndex;
+	data.color = [];
+	data.mine = [];
+	for (rowIndex = 0; rowIndex < data2.cell; rowIndex += 1) {
+		for (cellIndex = 0; cellIndex < data2.cell; cellIndex += 1) {
+			arrIndex = rowIndex * data2.cell + cellIndex;
 			if (rowIndex + cellIndex === 0) {
-				data.mine[rowIndex][cellIndex] = true;
-				data.color[rowIndex][cellIndex] = 9;
+				data.mine[arrIndex] = true;
+				data.color[arrIndex] = 9;
 			} else {
-				data.mine[rowIndex][cellIndex] = false;
-				data.color[rowIndex][cellIndex] = Math.floor(Math.random() * 6);
+				data.mine[arrIndex] = false;
+				data.color[arrIndex] = Math.floor(Math.random() * 6);
 			}
 		}
 	}
@@ -40,32 +50,36 @@ var initZone = function () {
 var initData = function (cell) {
 	data.color = [];
 	data.mine = [];
-	data.cell = cell;
+	data2.cell = cell;
 	initZone();
 	resetCheckCache();
 	data.minesum = 1;
-	data.turn = 0;
+	data2.turn = 0;
 };
 var createTable = function () {
-	var tableElem, rowIndex, cellIndex, rowElem, cellElem, $div, halfSize;
+	if (NO_UI) {
+		return;
+	}
+	var tableElem, rowIndex, cellIndex, rowElem, cellElem, $div, halfSize, arrIndex;
 	$("#zone").empty();
 	tableElem = document.createElement("table");
 	tableElem.cellSpacing = "0";
 	tableElem.cellPadding = "0";
-	halfSize = Math.floor(320 / data.cell / 2);
-	for (rowIndex = 0; rowIndex < data.cell; rowIndex += 1) {
+	halfSize = Math.floor(320 / data2.cell / 2);
+	for (rowIndex = 0; rowIndex < data2.cell; rowIndex += 1) {
 		rowElem = tableElem.insertRow(rowIndex);
-		for (cellIndex = 0; cellIndex < data.cell; cellIndex += 1) {
+		for (cellIndex = 0; cellIndex < data2.cell; cellIndex += 1) {
 			cellElem = rowElem.insertCell(cellIndex);
 			$div = $("<div>");
 			if (rowIndex + cellIndex === 0) {
 				$div.css("text-align", "center").css("font-size", halfSize + "px").text("H");
 			}
+			arrIndex = rowIndex * data2.cell + cellIndex;
 			$div
 			.removeClass()
-			.addClass("color" + data.color[rowIndex][cellIndex])
-			.height(320 / data.cell).width(320 / data.cell).appendTo(cellElem);
-			if (data.mine[rowIndex][cellIndex]) {
+			.addClass("color" + data.color[arrIndex])
+			.height(320 / data2.cell).width(320 / data2.cell).appendTo(cellElem);
+			if (data.mine[arrIndex]) {
 				$div.css("border-radius", halfSize + "px").css("-moz-border-radius", halfSize + "px").css("-webkit-border-radius", halfSize + "px");
 			}
 		}
@@ -76,13 +90,13 @@ var drawStage = function () {
 	if (NO_UI) {
 		return;
 	}
-	$("#stage").text(data.cell + "x" + data.cell);
+	$("#stage").text(data2.cell + "x" + data2.cell);
 };
 var drawTurn = function () {
 	if (NO_UI) {
 		return;
 	}
-	$("#turn").text(data.turn);
+	$("#turn").text(data2.turn);
 };
 var setMineBorder = function ($zone, size) {
 	if (NO_UI) {
@@ -95,7 +109,7 @@ var animateBorder = function ($zone, rowIndex, cellIndex) {
 		return;
 	}
 	var halfSize, bufIndex;
-	halfSize = Math.floor(320 / data.cell / 2);
+	halfSize = Math.floor(320 / data2.cell / 2);
 	bufIndex = rowIndex * cellIndex + cellIndex;
 	animateBuffer[bufIndex] = $zone;
 	setTimeout(function () {
@@ -115,35 +129,41 @@ var animateBorder = function ($zone, rowIndex, cellIndex) {
 	}, 80);
 };
 var get$zone = function (rowIndex, cellIndex) {
-	if (!NO_UI) {
-		var $zone = $("#zone div:eq(" + (data.cell * rowIndex + cellIndex) + ")");
-		return $zone.length ? $zone : null;
-	} else {
-		return 0 <= rowIndex && rowIndex < data.cell && 0 <= cellIndex && cellIndex < data.cell;
+	if (0 <= rowIndex && rowIndex < data2.cell && 0 <= cellIndex && cellIndex < data2.cell) {
+		if (!NO_UI) {
+			var $zone = $("#zone div:eq(" + (data2.cell * rowIndex + cellIndex) + ")");
+			return $zone.length ? $zone : null;
+		} else {
+			return true;
+		}
 	}
+	return false;
 };
 var setColorToZone = function ($zone, rowIndex, cellIndex) {
+	if (NO_UI) {
+		return;
+	}
 	$zone
 	.removeClass()
-	.addClass("color" + data.color[rowIndex][cellIndex]);
+	.addClass("color" + data.color[rowIndex * data2.cell + cellIndex]);
 };
 var checkZone = function (rowIndex, cellIndex, newColorIndex) {
-	var $zone = get$zone(rowIndex, cellIndex);
-	if ($zone && checkCache[rowIndex][cellIndex] !== true) {
-		if (data.mine[rowIndex][cellIndex] === true) {
-			checkCache[rowIndex][cellIndex] = true;
-			data.color[rowIndex][cellIndex] = newColorIndex;
+	var $zone = get$zone(rowIndex, cellIndex), arrIndex = rowIndex * data2.cell + cellIndex;
+	if ($zone && checkCache[arrIndex] !== true) {
+		if (data.mine[arrIndex] === true) {
+			checkCache[arrIndex] = true;
+			data.color[arrIndex] = newColorIndex;
 			setColorToZone($zone, rowIndex, cellIndex);
 			return checkAround(rowIndex, cellIndex, newColorIndex);
 		} else {
-			if (data.color[rowIndex][cellIndex] === newColorIndex) {
-				checkCache[rowIndex][cellIndex] = true;
-				data.mine[rowIndex][cellIndex] = true;
+			if (data.color[arrIndex] === newColorIndex) {
+				checkCache[arrIndex] = true;
+				data.mine[arrIndex] = true;
 				data.minesum += 1;
 				animateBorder($zone, rowIndex, cellIndex);
 				return 1 + checkAround(rowIndex, cellIndex, newColorIndex);
 			} else {
-				checkCache[rowIndex][cellIndex] = true;
+				checkCache[arrIndex] = true;
 			}
 		}
 	}
@@ -159,7 +179,7 @@ var checkAround = function (rowIndex, cellIndex, newColorIndex) {
 };
 var changeStage = function (plus) {
 	var stage;
-	stage = data.cell + plus;
+	stage = data2.cell + plus;
 	if (stage < 2) {
 		stage = 10;
 	}
@@ -172,13 +192,13 @@ var setBtn = function (index) {
 	var drawCount, i, len, halfSize;
 	drawCount = checkZone(0, 0, index);
 	if (0 < drawCount) {
-		data.turn += 1;
+		data2.turn += 1;
 		drawTurn();
 	}
-	if (data.cell * data.cell <= data.minesum) {
+	if (data2.cell * data2.cell <= data.minesum) {
 		//clear animation
-		len = data.cell * data.cell;
-		halfSize = Math.floor(320 / data.cell / 2);
+		len = data2.cell * data2.cell;
+		halfSize = Math.floor(320 / data2.cell / 2);
 		for (i = 0; i < len; i += 1) {
 			if (animateBuffer[i]) {
 				setMineBorder(animateBuffer[i], halfSize);
@@ -220,40 +240,81 @@ var initGame = function (cell) {
 	drawGame();
 };
 
-var ddMap = [];
+var ddGoal = 0;
+var ddMap = {};
 var ddd = function () {
-	var i, startTime, s = "";
-	for (i = 0; i < data.cell; i += 1) {
-		s += data.color[i].join("");
-	}
+	var startTime, noUiBack, s;
+	s = data.color.join("");
+	ddGoal = data2.cell * data2.cell;
 	console.log(s);
 	startTime = new Date();
-	ddMap = [];
+	ddMap = {};
+	noUiBack = NO_UI;
 	NO_UI = true;
-	dd3(JSON.stringify(data), "");
-	NO_UI = false;
+	simulationGo(JSON.stringify(data), 0);
+	NO_UI = noUiBack;
 	console.log(((new Date() - startTime) / 1000) + " sec");
 	
 	return JSON.stringify(ddMap, null, 2);
 };
-var dd3 = function (s, w) {
-	if (data.cell * data.cell <= data.minesum) {
-		if (!ddMap[w.length]) {
-			ddMap[w.length] = 1;
+var simulationGo = function (s, w) {
+	if (ddGoal <= data.minesum) {
+		if (!ddMap[w]) {
+			ddMap[w] = 1;
 		} else {
-			ddMap[w.length] += 1;
+			ddMap[w] += 1;
 		}
-		return;
-	}
-	var i, s2, w2, drawCount;
-	for (i = 0; i < 6; i += 1) {
-		resetCheckCache();
-		drawCount = checkZone(0, 0, i);
-		if (drawCount) {
-			s2 = JSON.stringify(data);
-			w2 = w +  i;
-			dd3(s2, w2);
-			data = JSON.parse(s);
+	} else {
+		var i;
+		for (i = 0; i < 6; i += 1) {
+			resetCheckCache();
+			if (checkZone(0, 0, i)) {
+				simulationGo(JSON.stringify(data), w + 1);
+				data = JSON.parse(s);
+			}
 		}
 	}
 };
+
+//loop code.
+if (require.main === module) {
+	var request, startTime, s, spend, n, nArr, min, max, count, loop;
+	request = require('request');
+	ddGoal = SERVER_STAGE * SERVER_STAGE;
+	count = 0;
+	loop = function () {
+		initGame(SERVER_STAGE);
+		s = data.color.join('');
+		startTime = new Date();
+		ddMap = {};
+		simulationGo(JSON.stringify(data), 0);
+		spend = new Date() - startTime;
+		nArr = [];
+		sumCount = 0;
+		for (n in ddMap) {
+			if (ddMap.hasOwnProperty(n)) {
+				sumCount += ddMap[n];
+				nArr.push(n);
+			}
+		}
+		min = Math.min.apply(null, nArr);
+		max = Math.max.apply(null, nArr);
+		request.post({
+			url: SERVER_URL,
+			form: {
+				cell: SERVER_STAGE,
+				code: s,
+				sum_c; sumCount,
+				min: min,
+				min_c: ddMap[min],
+				max: max,
+				max_c: ddMap[max],
+				solve: JSON.stringify(ddMap),
+				spend: spend
+			}
+		});
+		console.log('\t' + (count += 1) + '\t\t' + sumCount + ' c\t\t' + (spend / 1000) + ' sec');
+		process.nextTick(loop);
+	};
+	loop();
+}
