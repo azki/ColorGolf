@@ -245,34 +245,53 @@ var initGame = function (cell) {
 
 var ddGoal = 0;
 var ddMap = {};
+var ddMin = Infinity;
+var ddMinSolve = "";
+var ddMax = 0;
+var ddMaxSolve = "";
+var resetDd = function () {
+	ddMap = {};
+	ddMin = Infinity;
+	ddMinSolve = "";
+	ddMax = 0;
+	ddMaxSolve = "";
+};
 var ddd = function () {
 	var startTime, noUiBack, s;
 	s = data.color.join("");
 	ddGoal = data2.cell * data2.cell;
 	console.log(s);
 	startTime = new Date();
-	ddMap = {};
+	resetDd();
 	noUiBack = NO_UI;
 	NO_UI = true;
-	simulationGo(JSON.stringify(data), 0);
+	simulationGo(JSON.stringify(data), 0, "");
 	NO_UI = noUiBack;
 	console.log(((new Date() - startTime) / 1000) + " sec");
 	
 	return JSON.stringify(ddMap, null, 2);
 };
-var simulationGo = function (s, w) {
+var simulationGo = function (s, w, v) {
 	if (ddGoal <= data.minesum) {
 		if (!ddMap[w]) {
 			ddMap[w] = 1;
 		} else {
 			ddMap[w] += 1;
 		}
+		if (w < ddMin) {
+			ddMin = w;
+			ddMinSolve = v;
+		}
+		if (ddMax < w) {
+			ddMax = w;
+			ddMaxSolve = v;
+		}
 	} else {
 		var i;
 		for (i = 0; i < 6; i += 1) {
 			resetCheckCache();
 			if (checkZone(0, 0, i)) {
-				simulationGo(JSON.stringify(data), w + 1);
+				simulationGo(JSON.stringify(data), w + 1, v + i);
 				data = JSON.parse(s);
 			}
 		}
@@ -289,33 +308,31 @@ if (require.main === module) {
 	ddGoal = SERVER_STAGE * SERVER_STAGE;
 	count = 0;
 	loop = function () {
-		var s, n, startTime, spend, nArr, min, max, sumCount;
+		var s, n, startTime, spend, min, max, sumCount;
+		resetDd();
 		initGame(SERVER_STAGE);
 		s = data.color.join('');
 		startTime = new Date();
-		ddMap = {};
-		simulationGo(JSON.stringify(data), 0);
+		simulationGo(JSON.stringify(data), 0, "");
 		spend = new Date() - startTime;
-		nArr = [];
 		sumCount = 0;
 		for (n in ddMap) {
 			if (ddMap.hasOwnProperty(n)) {
 				sumCount += ddMap[n];
-				nArr.push(n);
 			}
 		}
-		min = Math.min.apply(null, nArr);
-		max = Math.max.apply(null, nArr);
 		request.post({
 			url: SERVER_URL,
 			form: {
 				cell: SERVER_STAGE,
 				code: s,
 				sum_c: sumCount,
-				min: min,
-				min_c: ddMap[min],
-				max: max,
-				max_c: ddMap[max],
+				min: ddMin,
+				min_c: ddMap[ddMin],
+				min_s: ddMinSolve,
+				max: ddMax,
+				max_c: ddMap[ddMax],
+				max_s: ddMaxSolve,
 				solve: JSON.stringify(ddMap),
 				spend: spend
 			}
