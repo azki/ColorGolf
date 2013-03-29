@@ -318,8 +318,9 @@ if (require.main === module) {
 //		}, function (e, r, b) {
 //			console.log(b);
 		});
-		console.log('\t' + (count += 1) + '\t\t' + sumCount + '\t\t' + (spend / 1000) + ' sec');
-		process.nextTick(loop);
+		console.log('\t' + (count += 1) + '\t\t' + sumCount + '\t\t' + Math.round(spend / 1000) + ' sec\t\t' + (sumCount / spend));
+		//process.nextTick(loop);
+		setTimeout(loop, 1);
 	};
 	loop();
 }
