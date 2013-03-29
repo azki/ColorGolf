@@ -316,12 +316,15 @@ if (require.main === module) {
 				solve: JSON.stringify(ddMap),
 				spend: spend
 			}
-//		}, function (e, r, b) {
-//			console.log(b);
+		}, function (e, r, b) {
+			if (e) {
+				console.log('hul.. Error!!');
+			}
+			console.log(b || 'ok');
+			process.nextTick(loop);
 		});
 		console.log('\t' + (count += 1) + '\t\t' + sumCount + '\t\t' + Math.round(spend / 1000) + ' sec\t\t' + (sumCount / spend));
-		//process.nextTick(loop);
-		setTimeout(loop, 1);
+		//setTimeout(loop, 1);
 	};
 	loop();
 }
