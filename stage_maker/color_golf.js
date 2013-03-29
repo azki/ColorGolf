@@ -1,5 +1,5 @@
 /*global window, $, setTimeout*/
-/*global require,module*/
+/*global require,module,process*/
 /*global checkAround,initGame,simulationGo*/
 var SERVER_STAGE = 5;
 var SERVER_URL = '';
@@ -278,13 +278,14 @@ var simulationGo = function (s, w) {
 
 //loop code.
 if (require.main === module) {
-	var request, startTime, s, spend, n, nArr, min, max, count, loop;
+	var request, count, loop;
 	SERVER_URL = require('fs').readFileSync('./serverurl.txt').toString().trim();
 	console.log('SERVER_URL : ' + SERVER_URL);
 	request = require('request');
 	ddGoal = SERVER_STAGE * SERVER_STAGE;
 	count = 0;
 	loop = function () {
+		var s, n, startTime, spend, nArr, min, max, sumCount;
 		initGame(SERVER_STAGE);
 		s = data.color.join('');
 		startTime = new Date();
