@@ -1,16 +1,19 @@
-/*global window, $, setTimeout*/
+/*global $, setTimeout*/
 /*global require,module,process*/
 /*global checkAround,initGame,simulationGo*/
-var SERVER_STAGE = process.argv[2] ? +process.argv[2] : 5;
-var SERVER_URL = '';
 var NO_UI = false;
 if (!this.window) {
-	window = {};
 	NO_UI = true;
 } else {
 	require = {};
 	module = {};
+	process = {
+		argv: []
+	};
 }
+var SERVER_STAGE = process.argv[2] ? +process.argv[2] : 5;
+var SERVER_URL = '';
+
 var data = {
 	color: [],
 	mine: [],
