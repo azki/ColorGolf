@@ -1,7 +1,7 @@
 /*global window, $, setTimeout*/
 /*global require,module*/
 /*global checkAround,initGame,simulationGo*/
-var SERVER_STAGE = 4;
+var SERVER_STAGE = 5;
 var SERVER_URL = '';
 var NO_UI = false;
 if (!this.window) {
@@ -279,6 +279,8 @@ var simulationGo = function (s, w) {
 //loop code.
 if (require.main === module) {
 	var request, startTime, s, spend, n, nArr, min, max, count, loop;
+	SERVER_URL = require('fs').readFileSync('./serverurl.txt').toString().trim();
+	console.log('SERVER_URL : ' + SERVER_URL);
 	request = require('request');
 	ddGoal = SERVER_STAGE * SERVER_STAGE;
 	count = 0;
@@ -304,7 +306,7 @@ if (require.main === module) {
 			form: {
 				cell: SERVER_STAGE,
 				code: s,
-				sum_c; sumCount,
+				sum_c: sumCount,
 				min: min,
 				min_c: ddMap[min],
 				max: max,
@@ -312,8 +314,10 @@ if (require.main === module) {
 				solve: JSON.stringify(ddMap),
 				spend: spend
 			}
+//		}, function (e, r, b) {
+//			console.log(b);
 		});
-		console.log('\t' + (count += 1) + '\t\t' + sumCount + ' c\t\t' + (spend / 1000) + ' sec');
+		console.log('\t' + (count += 1) + '\t\t' + sumCount + '\t\t' + (spend / 1000) + ' sec');
 		process.nextTick(loop);
 	};
 	loop();
